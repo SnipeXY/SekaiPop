@@ -117,6 +117,9 @@ Singleton {
         "lock.sleepDesktop": true,
         // Gacha lockscreen: the line of the song that is playing (and the next one) under the clock. Asks the lyrics providers for the song, like the desktop Lyrics widget.
         "lock.lyrics": false,
+        // Fingerprint unlock: a second PAM context using pam_fprintd.so runs alongside
+        // the password field. Off by default — machines without fprintd will skip it cleanly.
+        "lock.fingerprint": false,
         // ===== System updates =====
         "updates.nudgeAt": 30,          // from this many updates the badge asks for attention
         "updates.aur": true,            // count AUR updates too (yay / paru, when installed)

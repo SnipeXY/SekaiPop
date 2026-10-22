@@ -348,6 +348,14 @@ SettingsPage {
             onToggled: SettingsService.toggle("lock.animations")
         }
 
+        SettingToggle {
+            icon: "fingerprint"
+            label: "Fingerprint unlock"
+            detail: SettingsService.flag("lock.fingerprint") ? "Scans alongside the password field (needs fprintd and enrolled prints)" : "OFF"
+            checked: SettingsService.flag("lock.fingerprint")
+            onToggled: SettingsService.toggle("lock.fingerprint")
+        }
+
         SettingAction {
             icon: "lock"
             label: "Lock now"
