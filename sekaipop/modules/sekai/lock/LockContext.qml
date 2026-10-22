@@ -181,6 +181,7 @@ Scope {
         target: LockState
         function onLockedChanged() {
             if (!LockState.locked) {
+                fprintRetryTimer.stop()
                 pamFp.abort()
                 root.fprintListening = false
             }
