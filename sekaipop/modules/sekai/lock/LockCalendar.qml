@@ -810,7 +810,7 @@ Item {
                         }
 
                         Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.horizontalCenter: parent.verticalCenter
                             text: (cell.modelData.day < 10 ? "0" : "") + cell.modelData.day
                             color: cell.isToday ? root.ink : (cell.modelData.weekend ? root.accent : root.ink)
                             font.family: Theme.fontFamily
@@ -870,19 +870,39 @@ Item {
                     ColorAnimation { duration: 120 }
                 }
 
-                Text {
+                Row {
                     x: root.px(20)
                     y: root.px(10)
                     width: parent.width - root.px(40)
-                    elide: Text.ElideRight
-                    text: root.failed ? root.lastFailure.toUpperCase()
-                          : (root.context.unlockInProgress ? "CHECKING\u2026" : "PASSWORD")
-                    color: root.failed ? root.accent : LockPalette.calMuted
-                    font.family: Theme.fontFamily
-                    font.pixelSize: root.px(14)
-                    font.weight: Font.ExtraBold
-                    font.styleName: Theme.fontStyleBold
-                    font.letterSpacing: root.px(1)
+                    spacing: root.px(6)
+
+                    // Shown only while fprintd-verify has an active sensor ready.
+                    MaterialIcon {
+                        id: calFpIcon
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: root.context.fprintListening
+                        name: "fingerprint"
+                        size: root.px(16)
+                        color: root.failed ? root.accent : root.mint
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - (calFpIcon.visible ? calFpIcon.width + parent.spacing : 0)
+                        elide: Text.ElideRight
+                        text: root.failed ? root.lastFailure.toUpperCase()
+                              : (root.context.unlockInProgress ? "CHECKING\u2026" : "PASSWORD")
+                        color: root.failed ? root.accent : LockPalette.calMuted
+                        font.family: Theme.fontFamily
+                        font.pixelSize: root.px(14)
+                        font.weight: Font.ExtraBold
+                        font.styleName: Theme.fontStyleBold
+                        font.letterSpacing: root.px(1)
+                    }
                 }
 
                 // The dots sit in a pale well.
