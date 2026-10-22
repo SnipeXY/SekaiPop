@@ -895,8 +895,7 @@ Item {
                         width: parent.width - (calFpIcon.visible ? calFpIcon.width + parent.spacing : 0)
                         elide: Text.ElideRight
                         text: root.failed ? root.lastFailure.toUpperCase()
-                              : (root.context.unlockInProgress ? "CHECKING\u2026"
-                                 : (root.context.fprintListening ? "FINGERPRINT" : "PASSWORD"))
+                              : (root.context.unlockInProgress ? "CHECKING\u2026" : "PASSWORD")
                         color: root.failed ? root.accent : LockPalette.calMuted
                         font.family: Theme.fontFamily
                         font.pixelSize: root.px(14)

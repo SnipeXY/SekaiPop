@@ -36,6 +36,8 @@ Scope {
     // Only becomes true after pamFp is started (and the setting is on), so
     // machines without fprintd or without the setting enabled show no fingerprint UI.
     property bool fprintListening: false
+    property int fprintTries: 0
+    readonly property int maxFprintTries: 3
 
     signal unlocked()
     // Asks the surface(s) to grab keyboard focus again (see Lockscreen.qml).
@@ -88,7 +90,10 @@ Scope {
         if (LockState.phase !== "locked")
             return
         root.armed = ""
-        pamFp.abort()
+        if (typeof pamFp !== "undefined")
+            pamFp.abort()
+        if (typeof fprintRetryTimer !== "undefined")
+            fprintRetryTimer.stop()
         root.fprintListening = false
         root.clearText()
         sleepAction.running = true
@@ -149,7 +154,9 @@ Scope {
     function reset() {
         pam.abort()
         pamFp.abort()
+        fprintRetryTimer.stop()
         root.fprintListening = false
+        fprintTries = 0
         currentText = ""
         failureText = ""
         unlockInProgress = false
@@ -194,6 +201,7 @@ Scope {
             return
         // Abort fingerprint PAM before starting password PAM so they do not
         // compete for the sensor / PAM stack simultaneously.
+        fprintRetryTimer.stop()
         pamFp.abort()
         root.fprintListening = false
         failureText = ""
@@ -225,24 +233,34 @@ Scope {
     //
     // If pam_fprintd is not installed or no fingers are enrolled, PAM
     // returns an error immediately and fprintListening stays false.
+    Timer {
+        id: fprintRetryTimer
+        interval: 300
+        repeat: false
+        onTriggered: {
+            if (LockState.locked && !root.unlockInProgress && root.fprintTries < root.maxFprintTries)
+                root.startFp()
+        }
+    }
+
     PamContext {
         id: pamFp
-        configDirectory: Qt.resolvedUrl("./pam").toString().replace("file://", "")
+        configDirectory: decodeURIComponent(Qt.resolvedUrl("./pam").toString().replace("file://", ""))
         config: "lock-fingerprint"
 
-        // pam_fprintd sends a "Place your finger" style message — no
-        // response needed. Just absorb it so PAM can continue waiting.
         onPamMessage: {
-            // pam_fprintd doesn't need a password response; ignore all prompts.
+            if (this.responseRequired)
+                this.respond("")
         }
 
         onCompleted: result => {
             root.fprintListening = false
-            if (!LockState.locked)
+            if (!LockState.locked || root.unlockInProgress)
                 return
 
             if (result === PamResult.Success) {
                 pam.abort()
+                fprintRetryTimer.stop()
                 root.unlockInProgress = false
                 root.currentText = ""
                 root.failureText = ""
@@ -250,19 +268,18 @@ Scope {
                 return
             }
 
-            // On failure: show a message, shake (bump failureCount), and
-            // restart so the user can try again, unless PAM returned an
-            // unrecoverable error (fprintd not installed, no enrolled prints).
             if (result === PamResult.Error) {
                 // pam_fprintd is not available or no prints enrolled — stop silently.
                 return
             }
 
-            root.failureCount++
+            root.fprintTries++
             root.failureText = "Fingerprint not recognized"
-            // Restart from onCompleted (not a timer) so the sensor is
-            // guaranteed free before we re-arm it.
-            startFp()
+            if (root.fprintTries >= root.maxFprintTries) {
+                root.failureCount++
+            } else {
+                fprintRetryTimer.restart()
+            }
         }
     }
 
