@@ -35,7 +35,8 @@ Scope {
     // True after PAM has reported a fingerprint prompt, not merely while the
     // authentication conversation is starting.
     property bool fprintListening: false
-    // True from start() until the conversation completes or is aborted; also makes late signals from an aborted conversation harmless.
+    // True from start() until the conversation completes or is aborted;
+    // also makes late signals from an aborted conversation harmless.
     property bool fprintActive: false
     // Set when pam_fprintd runs out of tries; cleared by a password attempt, a new lock, or a resume.
     property bool fprintExhausted: false
