@@ -968,7 +968,7 @@ Item {
                             visible: !root.context.unlockInProgress
                             spacing: root.px(10)
 
-                            // Shown alongside the arrow when fprintd is listening.
+                            // Shown alongside the arrow after PAM reports a fingerprint prompt.
                             MaterialIcon {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: root.context.fprintListening
