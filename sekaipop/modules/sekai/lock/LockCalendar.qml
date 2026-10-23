@@ -876,7 +876,7 @@ Item {
                     width: parent.width - root.px(40)
                     spacing: root.px(6)
 
-                    // Shown only while fprintd-verify has an active sensor ready.
+                    // Shown after PAM reports a fingerprint prompt.
                     MaterialIcon {
                         id: calFpIcon
                         anchors.verticalCenter: parent.verticalCenter
@@ -895,8 +895,9 @@ Item {
                         width: parent.width - (calFpIcon.visible ? calFpIcon.width + parent.spacing : 0)
                         elide: Text.ElideRight
                         text: root.failed ? root.lastFailure.toUpperCase()
-                              : (root.context.unlockInProgress ? "CHECKING\u2026" : "PASSWORD")
-                        color: root.failed ? root.accent : LockPalette.calMuted
+                            : (root.context.fprintListening ? root.context.fingerprintMessage.toUpperCase()
+                            : (root.context.unlockInProgress ? "CHECKING\u2026" : "PASSWORD"))
+                        color: root.failed || root.context.fingerprintMessageIsError ? root.accent : LockPalette.calMuted
                         font.family: Theme.fontFamily
                         font.pixelSize: root.px(14)
                         font.weight: Font.ExtraBold

@@ -791,9 +791,13 @@ Item {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width - root.px(48)
                         y: root.px(12)
-                        text: root.context.unlockInProgress ? "Checking…" : "Password"
-                        color: LockPalette.cBorder
+                        elide: Text.ElideRight
+                        horizontalAlignment: Text.AlignHCenter
+                        text: root.context.fprintListening ? root.context.fingerprintMessage
+                              : (root.context.unlockInProgress ? "Checking…" : "Password")
+                        color: root.context.fingerprintMessageIsError ? LockPalette.pink : LockPalette.cBorder
                         font.family: Theme.fontFamily
                         font.pixelSize: root.px(34)
                         font.weight: Font.ExtraBold

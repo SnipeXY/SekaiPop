@@ -104,18 +104,30 @@ Scope {
             }
         }
     }
-   Process {
+    Process {
         id: logindWatcher
+        property bool awaitingSleepState: false
         running: true
         command: [
             "setpriv", "--pdeathsig", "TERM", "dbus-monitor", "--system",
-            "type='signal',sender='org.freedesktop.login1',interface='org.freedesktop.login1.Session',member='Lock'"
+            "type='signal',sender='org.freedesktop.login1',interface='org.freedesktop.login1.Session',member='Lock'",
+            "type='signal',sender='org.freedesktop.login1',interface='org.freedesktop.login1.Manager',member='PrepareForSleep'"
         ]
         stdout: SplitParser {
             onRead: line => {
-                // dbus-monitor prints: signal time=... sender=... member=Lock
-                if (line.startsWith("signal ") && line.includes("member=Lock"))
+                if (line.startsWith("signal ") && line.includes("member=Lock")) {
                     LockState.lock()
+                    return
+                }
+                if (line.startsWith("signal ") && line.includes("member=PrepareForSleep")) {
+                    logindWatcher.awaitingSleepState = true
+                    return
+                }
+                if (logindWatcher.awaitingSleepState && line.trim() !== "") {
+                    logindWatcher.awaitingSleepState = false
+                    if (line.trim() === "boolean false")
+                        lockContext.resumeFromSleep()
+                }
             }
         }
         onExited: {
