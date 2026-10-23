@@ -194,7 +194,6 @@ Scope {
         if (!LockState.locked || !SettingsService.flag("lock.fingerprint"))
             return
         stopFp()
-        root.fprintExhausted = false
         fprintResumeTimer.restart()
     }
 
