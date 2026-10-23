@@ -78,7 +78,7 @@ Most shells pick one look and theme it. SekaiPop starts from a single design lan
 </tr>
 <tr>
 <td valign="top"><b>Shader wallpaper transitions</b><br>Ring, Iris, Star (it spins), Blocks, Flash, Fade and Random. The bands cover the whole desktop, then reveal the new wallpaper, in your theme's colours. The same transition plays into and out of the lockscreen.</td>
-<td valign="top"><b>Two lockscreens</b><br>Gacha, and Calendar: a poster with three frames cut from your wallpaper, the clock as four keycaps, a month card and two-press Restart / Shut down keys. Hold <kbd>Ctrl</kbd> and Enter becomes Sleep. While locked, the desktop sleeps: widgets are freed, cava and video wallpapers stop, and everything wakes up one by one on unlock. Fingerprint unlock is available when <code>fprintd</code> is installed and prints are enrolled (Settings → General → Fingerprint unlock).</td>
+<td valign="top"><b>Two lockscreens</b><br>Gacha, and Calendar: a poster with three frames cut from your wallpaper, the clock as four keycaps, a month card and two-press Restart / Shut down keys. Hold <kbd>Ctrl</kbd> and Enter becomes Sleep. While locked, the desktop sleeps: widgets are freed, cava and video wallpapers stop, and everything wakes up one by one on unlock. Fingerprint unlock is available when <code>fprintd</code> is installed and prints are enrolled (Settings > General > Launcher & lock > Fingerprint unlock (off by default)).</td>
 </tr>
 <tr>
 <td valign="top"><b>A dock with real tools</b><br>Search, Files (Music, Pictures, Videos, Documents, Trash, with video thumbnails), Clipboard, Timer, a media card with seeking, and the Shelf: a drag-and-drop tray where items become polaroids, vinyls, books, folders and notes held with tape.</td>

@@ -1,4 +1,2 @@
 #%PAM-1.0
-auth sufficient pam_fprintd.so timeout=-1
-auth required pam_deny.so
-account include login
+auth required pam_fprintd.so timeout=-1
