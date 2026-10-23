@@ -175,6 +175,7 @@ Scope {
     }
 
     function stopFp() {
+        fprintResumeTimer.stop()
         root.fprintActive = false
         root.fprintListening = false
         root.fingerprintMessage = ""
@@ -189,7 +190,19 @@ Scope {
             return
         stopFp()
         if (!root.unlockInProgress && SettingsService.flag("lock.fingerprint"))
-            startFp()
+            fprintResumeTimer.restart()
+    }
+
+    // Let the aborted PAM subprocess and the fingerprint device settle before
+    // asking fprintd to claim the reader again.
+    Timer {
+        id: fprintResumeTimer
+        interval: 600
+        onTriggered: {
+            if (LockState.locked && !root.unlockInProgress
+                && SettingsService.flag("lock.fingerprint"))
+                startFp()
+        }
     }
 
     // Clean up fingerprint PAM when the screen unlocks.
