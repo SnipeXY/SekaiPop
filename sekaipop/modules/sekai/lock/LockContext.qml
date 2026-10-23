@@ -188,9 +188,8 @@ Scope {
         if (!LockState.locked)
             return
         stopFp()
-        if (root.unlockInProgress || !SettingsService.flag("lock.fingerprint"))
-            return
-        startFp()
+        if (!root.unlockInProgress && SettingsService.flag("lock.fingerprint"))
+            startFp()
     }
 
     // Clean up fingerprint PAM when the screen unlocks.
@@ -200,12 +199,6 @@ Scope {
             if (!LockState.locked)
                 stopFp()
         }
-    }
-
-    // Re-arm after waking from suspend when the lockscreen regains focus.
-    onFocusRequested: {
-        if (LockState.locked && !unlockInProgress && !fprintActive)
-            startFp()
     }
 
     function tryUnlock() {
