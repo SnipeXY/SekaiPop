@@ -115,10 +115,12 @@ Scope {
         ]
         stdout: SplitParser {
             onRead: line => {
+                // dbus-monitor prints: signal time=... sender=... member=Lock
                 if (line.startsWith("signal ") && line.includes("member=Lock")) {
                     LockState.lock()
                     return
                 }
+                // PrepareForSleep carries its boolean on the next output line.
                 if (line.startsWith("signal ") && line.includes("member=PrepareForSleep")) {
                     logindWatcher.awaitingSleepState = true
                     return

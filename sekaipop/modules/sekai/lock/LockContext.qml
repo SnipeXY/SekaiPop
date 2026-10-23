@@ -35,10 +35,12 @@ Scope {
     // True after PAM has reported a fingerprint prompt, not merely while the
     // authentication conversation is starting.
     property bool fprintListening: false
+    // True from start() until the conversation completes or is aborted; also makes late signals from an aborted conversation harmless.
     property bool fprintActive: false
+    // Set when pam_fprintd runs out of tries; cleared by a password attempt, a new lock, or a resume.
     property bool fprintExhausted: false
-    property string fingerprintMessage: ""
-    property bool fingerprintMessageIsError: false
+    property string fprintMessage: ""
+    property bool fprintMessageIsError: false
 
     signal unlocked()
     // Asks the surface(s) to grab keyboard focus again (see Lockscreen.qml).
@@ -169,28 +171,30 @@ Scope {
             return
         root.fprintActive = true
         root.fprintListening = false
-        root.fingerprintMessage = ""
-        root.fingerprintMessageIsError = false
         pamFp.start()
+    }
+
+    function clearFpMessage() {
+        root.fprintMessage = ""
+        root.fprintMessageIsError = false
     }
 
     function stopFp() {
         fprintResumeTimer.stop()
         root.fprintActive = false
         root.fprintListening = false
-        root.fingerprintMessage = ""
-        root.fingerprintMessageIsError = false
+        clearFpMessage()
         pamFp.abort()
     }
 
     // fprintd may lose its reader while the machine sleeps. Abort any stale
     // conversation before starting a fresh one after logind resumes.
     function resumeFromSleep() {
-        if (!LockState.locked)
+        if (!LockState.locked || !SettingsService.flag("lock.fingerprint"))
             return
         stopFp()
-        if (!root.unlockInProgress && SettingsService.flag("lock.fingerprint"))
-            fprintResumeTimer.restart()
+        root.fprintExhausted = false
+        fprintResumeTimer.restart()
     }
 
     // Let the aborted PAM subprocess and the fingerprint device settle before
@@ -198,11 +202,7 @@ Scope {
     Timer {
         id: fprintResumeTimer
         interval: 600
-        onTriggered: {
-            if (LockState.locked && !root.unlockInProgress
-                && SettingsService.flag("lock.fingerprint"))
-                startFp()
-        }
+        onTriggered: root.startFp()
     }
 
     // Clean up fingerprint PAM when the screen unlocks.
@@ -248,7 +248,7 @@ Scope {
 
     // ===== fingerprint authentication (PAM / pam_fprintd) =====
     // A separate PAM authentication service lets pam_fprintd decide matches
-    // and report its own errors
+    // and report its own errors.
     PamContext {
         id: pamFp
         configDirectory: Quickshell.shellDir + "/modules/sekai/lock/pam"
@@ -260,8 +260,8 @@ Scope {
             const message = this.message.trim()
             if (message !== "") {
                 root.fprintListening = true
-                root.fingerprintMessage = message
-                root.fingerprintMessageIsError = this.messageIsError
+                root.fprintMessage = message
+                root.fprintMessageIsError = this.messageIsError
             }
             if (this.responseRequired)
                 this.respond("")
@@ -272,14 +272,11 @@ Scope {
                 return
             root.fprintActive = false
             root.fprintListening = false
-            root.fingerprintMessage = ""
-            root.fingerprintMessageIsError = false
+            root.clearFpMessage()
             if (!LockState.locked || root.unlockInProgress)
                 return
 
             if (result === PamResult.Success) {
-                pam.abort()
-                root.unlockInProgress = false
                 root.currentText = ""
                 root.failureText = ""
                 root.unlocked()

@@ -795,9 +795,9 @@ Item {
                         y: root.px(12)
                         elide: Text.ElideRight
                         horizontalAlignment: Text.AlignHCenter
-                        text: root.context.fprintListening ? root.context.fingerprintMessage
+                        text: root.context.fprintListening ? root.context.fprintMessage
                               : (root.context.unlockInProgress ? "Checking…" : "Password")
-                        color: root.context.fingerprintMessageIsError ? LockPalette.pink : LockPalette.cBorder
+                        color: root.context.fprintMessageIsError ? LockPalette.pink : LockPalette.cBorder
                         font.family: Theme.fontFamily
                         font.pixelSize: root.px(34)
                         font.weight: Font.ExtraBold
